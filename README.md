@@ -6,5 +6,5 @@ At Codernov Electronics Repair, we recognize that the intention behind r3b0rn is
 "Dvornik" is a common call sign used by radio hooligans.  
 dv0rn1c-n0va is a proper leet hacker firmware. 
 
-##License  
-GPL-3.0  
+## License  
+We believe that source code should always be accessible, as this fosters progress and innovation. For this reason, our license is GPL-3.0.  
