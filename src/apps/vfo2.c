@@ -105,7 +105,6 @@ static void render2VFOPart(uint8_t i) {
 }
 
 void VFO2_init(void) {
-  gVfo1ProMode = false;
   RADIO_LoadCurrentVFO();
 }
 

@@ -1,3 +1,4 @@
+
 #include "../gfxfont.h"
 
 const uint8_t dig_11_Bitmaps[] PROGMEM = {
@@ -33,3 +34,17 @@ const GFXglyph dig_11_Glyphs[] PROGMEM = {
 
 const GFXfont dig_11 PROGMEM = {(uint8_t *)dig_11_Bitmaps, 
                                 (GFXglyph *)dig_11_Glyphs, 0x2D, 0x39,   11};
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                

@@ -18,7 +18,6 @@
 #include "../ui/statusline.h"
 
 
-bool gVfo1ProMode = false;
 
 static uint8_t menuIndex = 0;
 static bool registerActive = false;
@@ -103,9 +102,6 @@ static void channelScanFn(bool forward) {
 
 void VFO1_init(void) {
   gDW.activityOnVFO = -1;
-  if (!gVfo1ProMode) {
-    gVfo1ProMode = gSettings.iAmPro;
-  }
   RADIO_LoadCurrentVFO();
 }
 
@@ -121,18 +117,14 @@ void VFO1_update(void) {
           RADIO_NextFreqNoClicks(false);
         }
         gRedrawScreen = true;
-          if (gVfo1ProMode) {
           RADIO_UpdateMeasurements();
-    }
       }
     }
   }
 
   if (gIsListening && Now() - gLastRender >= 500) {
     gRedrawScreen = true;
-    if (gVfo1ProMode) {
       RADIO_UpdateMeasurements();
-    }
   }
 }
 
@@ -256,10 +248,8 @@ bool VFOPRO_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
       APPS_run(APP_VFO_CFG);
       return true;
     case KEY_SIDE1:
-      if (!gVfo1ProMode) {
         gMonitorMode = !gMonitorMode;
         return true;
-      }
       if (RADIO_GetRadio() == RADIO_SI4732 && isSsb) {
         RADIO_TuneToSave(radio->rx.f + 1);
         return true;
@@ -324,12 +314,13 @@ bool VFO1_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
     }
   }
 
-  if (gVfo1ProMode && VFOPRO_key(key, bKeyPressed, bKeyHeld)) {
+  if (VFOPRO_key(key, bKeyPressed, bKeyHeld)) {
     return true;
   }
 
   if (key == KEY_PTT && !gIsNumNavInput) {
     RADIO_ToggleTX(bKeyHeld);
+    RADIO_ToggleVfoMR();
     return true;
   }
 
@@ -389,8 +380,6 @@ bool VFO1_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
       APPS_run(APP_PRESETS_LIST);
       return true;
     case KEY_2:
-      gSettings.iAmPro = !gSettings.iAmPro;
-      gVfo1ProMode = gSettings.iAmPro;
       SETTINGS_Save();
       return true;
     case KEY_3:
@@ -549,50 +538,108 @@ static void DrawRegs(void) {
   }
 }
 
-void VFO1_render(void) {
-  const uint8_t BASE = 42;
+//---------------------------------------------------------------------------
+void VFO1_render(void) 
+  {
+    const uint8_t BASE = 42;
 
- if (gIsNumNavInput) {
-    STATUSLINE_SetText("Select: %s", gNumNavInput);
-  } else {
-    STATUSLINE_SetText("%s:%u", gCurrentPreset->band.name,
-                       PRESETS_GetChannel(gCurrentPreset, radio->rx.f) + 1);
-  }
+    if (gIsNumNavInput) 
+      {
+        STATUSLINE_SetText("Select: %s", gNumNavInput);
+      } 
+    else 
+      {
+        STATUSLINE_SetText( "%s:%u", 
+                            gCurrentPreset->band.name,
+                            PRESETS_GetChannel(gCurrentPreset, radio->rx.f) + 1
+                          );
+      }
  
-  VFO *vfo = &gVFO[gSettings.activeVFO];
-  Preset *p = gVFOPresets[gSettings.activeVFO];
-  uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(vfo->rx.f);
+    VFO *vfo = &gVFO[gSettings.activeVFO];
+    Preset *p = gVFOPresets[gSettings.activeVFO];
+    uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(vfo->rx.f);
 
-  uint16_t fp1 = f / MHZ;
-  uint16_t fp2 = f / 100 % 1000;
-  uint8_t fp3 = f % 100;
-  const char *mod =
-      modulationTypeOptions[vfo->modulation == MOD_PRST ? p->band.modulation
-                                                        : vfo->modulation];
-  if (gIsListening || gVfo1ProMode) {
-    UI_RSSIBar(gLoot[gSettings.activeVFO].rssi, RADIO_GetSNR(), vfo->rx.f,
-               BASE + 2);
-  
-    
-  }
+    uint16_t fp1 = f / MHZ;
+    uint16_t fp2 = f / 100 % 1000;
+    uint8_t fp3 = f % 100;
+    const char *mod = modulationTypeOptions[   vfo->modulation == MOD_PRST 
+                                             ? p->band.modulation
+                                             : vfo->modulation
+                                           ];
+                                           
+                                           
+     UI_RSSIBar(gLoot[gSettings.activeVFO].rssi, RADIO_GetSNR(), vfo->rx.f, BASE + 2);
 
-  if (radio->channel >= 0) {
-    PrintMediumEx(LCD_XCENTER, BASE - 16, POS_C, C_FILL,
-                  gVFONames[gSettings.activeVFO]);
-  }
+//    if (radio->channel >= 0) 
+//      {
+        PrintMediumEx(47/*LCD_XCENTER*/, BASE - 16, POS_L, C_FILL, "XXX");// gVFONames[gSettings.activeVFO]);
+//      }
 
-  if (gTxState && gTxState != TX_ON) {
-    PrintMediumBoldEx(LCD_XCENTER, BASE, POS_C, C_FILL, "%s",
-                      TX_STATE_NAMES[gTxState]);
-  } else {
-    PrintBiggestDigitsEx(LCD_WIDTH - 22, BASE, POS_R, C_FILL, "%4u.%03u", fp1,
-                         fp2);
-    PrintBigDigitsEx(LCD_WIDTH - 1, BASE, POS_R, C_FILL, "%02u", fp3);
-    PrintMediumEx(LCD_WIDTH - 1, BASE - 12, POS_R, C_FILL, mod);
-  }
+    if (gTxState && gTxState != TX_ON) 
+      {
+        PrintMediumBoldEx(LCD_XCENTER, BASE, POS_C, C_FILL, "%s", TX_STATE_NAMES[gTxState]);
+      } 
+    else 
+      {
+        PrintBiggestDigitsEx(LCD_WIDTH - 22, BASE, POS_R, C_FILL, "%4u.%03u", fp1, fp2);
+        //PrintBigDigitsEx(LCD_WIDTH - 22, BASE - 4, POS_R, C_FILL, "%4u.%03u", fp1, fp2);
+        PrintBigDigitsEx(LCD_WIDTH - 1, BASE, POS_R, C_FILL, "%02u", fp3);
+        //PrintMediumBoldEx(LCD_WIDTH - 1, BASE, POS_R, C_FILL, "%02u", fp3);
+        PrintMediumEx(LCD_WIDTH - 1, BASE - 12, POS_R, C_FILL, mod);
+      }
 
-  if (gVfo1ProMode) {
     UI_FSmall(gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio->rx.f));
     DrawRegs();
   }
-}
+
+//---------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
