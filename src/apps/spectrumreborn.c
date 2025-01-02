@@ -222,6 +222,7 @@ bool SPECTRUM_key(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
     case KEY_PTT:
       if (gLastActiveLoot) {
         RADIO_TuneToSave(gLastActiveLoot->f);
+        gVfo1ProMode = true;
         APPS_run(APP_VFO1);
       }
       return true;

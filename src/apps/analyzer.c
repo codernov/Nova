@@ -260,6 +260,7 @@ bool ANALYZER_key(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld) {
     case KEY_PTT:
       if (centerF == peakF) {
         RADIO_TuneToSave(centerF);
+        gVfo1ProMode = true;
         APPS_run(APP_VFO1);
       } else if (peakF) {
         setCenterF(peakF);
