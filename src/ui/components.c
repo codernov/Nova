@@ -94,22 +94,36 @@ void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y)
 void UI_FSmall(uint32_t f) {
   SQL sq = GetSql(gCurrentPreset->band.squelch);
 
-  PrintSmall(0, 12, "R %u", RADIO_GetRSSI());
-  PrintSmall(30, 12, "N %u", BK4819_GetNoise());
-  PrintSmall(60, 12, "G %u", BK4819_GetGlitch());
-  PrintSmall(90, 12, "SQ %u", gCurrentPreset->band.squelch);
+  PrintSmall(0, 18, "%u", RADIO_GetRSSI());
+  PrintSmall(38, 18, "%u", BK4819_GetNoise());
+  PrintSmall(76, 18, "%u", BK4819_GetGlitch());
 
-  PrintSmall(0, 18, "%u/%u", sq.ro, sq.rc);
-  PrintSmall(30, 18, "%u/%u", sq.no, sq.nc);
-  PrintSmall(60, 18, "%u/%u", sq.go, sq.gc);
+  PrintSmall(0, 12,"%u/%u", sq.ro, sq.rc);
+  PrintSmall(38, 12,"%u/%u", sq.no, sq.nc);
+  PrintSmall(76, 12,"%u/%u", sq.go, sq.gc);
 
-  PrintSmallEx(LCD_WIDTH - 1, 12, POS_R, C_FILL, "SNR %u", RADIO_GetSNR());
+  PrintMediumEx(LCD_WIDTH, 14, POS_R, C_FILL, "%u", RADIO_GetSNR());
 
-  PrintSmallEx(LCD_WIDTH - 1, 18, POS_R, true,
+  PrintSmallEx(LCD_WIDTH, 20, POS_R, true,
                RADIO_GetBWName(gCurrentPreset->band.bw));
+   
+  if (gCurrentPreset->band.gainIndex != AUTO_GAIN_INDEX) 
+    {
+      PrintSmall(0, 29, "%+ddB", -gainTable[gCurrentPreset->band.gainIndex].gainDb + 33);
+    }
+  else
+    {
+      PrintSmall(0, 29, "AUTO");
+    }
+
+
+               
+  PrintMedium(0, 43, "%s %u", sqTypeNames[gCurrentPreset->band.squelchType], gCurrentPreset->band.squelch);
+               
   const uint32_t step = StepFrequencyTable[gCurrentPreset->band.step];
-  PrintSmallEx(0, 42, POS_L, C_FILL, "STP %d.%02dk", step / 100, step % 100);
+  PrintSmallEx(0, 35, POS_L, C_FILL, "%d.%02dk", step / 100, step % 100);
 }
+
 
 void UI_FSmallest(uint32_t f, uint8_t x, uint8_t y) {
   PrintSmall(x, y, "%u.%05u", f / MHZ, f % MHZ);

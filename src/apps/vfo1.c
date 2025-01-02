@@ -587,7 +587,7 @@ void VFO1_render(void)
 
     if (radio->channel >= 0) 
       {
-        PrintMediumEx(LCD_WIDTH - 22, BASE - 15, POS_R, C_FILL, gVFONames[gSettings.activeVFO]);
+        PrintMediumEx(LCD_WIDTH - 25, BASE - 15, POS_R, C_FILL, gVFONames[gSettings.activeVFO]);
       }
 
     if (gTxState && gTxState != TX_ON) 
@@ -596,20 +596,20 @@ void VFO1_render(void)
       } 
     else 
       {
-        PrintBiggestDigitsEx(LCD_WIDTH - 22, BASE, POS_R, C_FILL, "%4u.%03u", fp1, fp2);
-        PrintBigDigitsEx(LCD_WIDTH - 1, BASE, POS_R, C_FILL, "%02u", fp3);
+        PrintBiggestDigitsEx(LCD_WIDTH - 21, BASE, POS_R, C_FILL, "%4u.%03u", fp1, fp2);
+        PrintBigDigitsEx(LCD_WIDTH, BASE, POS_R, C_FILL, "%02u", fp3);
         
-        PrintMediumEx(LCD_WIDTH - 2, BASE - 13, POS_R, C_FILL, mod);
-        
+        PrintMediumEx(LCD_WIDTH - 2, BASE - 13, POS_R, C_FILL, mod);        
         if (vfo_mod != MOD_PRST && vfo_mod != band_mod) 
           {
-            FillRect(LCD_WIDTH - 20, BASE - 20, 19, 9, C_INVERT);
+            FillRect(LCD_WIDTH - 20, BASE - 20, 20, 9, C_INVERT);
           }
       }
 
     if (gVfo1ProMode) {    
     DrawRegs();
     }
+    
     
     UI_FSmall(gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio->rx.f));
   }
