@@ -81,3 +81,18 @@ void PrintSymbolsEx(uint8_t x, uint8_t y, TextPos posLCR, Color color,
                     const char *pattern, ...);
 
 #endif /* end of include guard: GRAPHICS_H */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -61,7 +61,7 @@ void SVC_SCAN_Init(void) {
   }
 
   if (!gScanFn) {
-    if (radio->channel >= 0) {
+    if (RADIO_VfoIsCH()) {
       gScanFn = RADIO_NextCH;
     } else {
       gScanFn = RADIO_NextPresetFreqXBand;

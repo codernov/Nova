@@ -91,6 +91,12 @@ ModulationType RADIO_GetModulation() {
                                        : radio->modulation;
 }
 
+
+bool RADIO_VfoIsCH()
+  {
+    return radio->channel >= 0;
+  }
+
 const char *RADIO_GetBWName(BK4819_FilterBandwidth_t i) {
   switch (RADIO_GetRadio()) {
   case RADIO_SI4732:
@@ -855,7 +861,7 @@ void RADIO_NextVFO(void) {
 }
 
 void RADIO_ToggleVfoMR(void) {
-  if (radio->channel >= 0) {
+  if (RADIO_VfoIsCH()) {
     radio->channel += 1; // 0 -> 1
     radio->channel *= -1;
   } else {
@@ -879,7 +885,7 @@ void RADIO_UpdateSquelchLevel(bool next) {
 void RADIO_NextFreqNoClicks(bool next) {
   const int8_t dir = next ? 1 : -1;
 
-  if (radio->channel >= 0) {
+  if (RADIO_VfoIsCH()) {
     RADIO_NextCH(next);
     return;
   }

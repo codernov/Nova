@@ -31,7 +31,7 @@ GIT_HASH := $(shell git rev-parse --short HEAD)
 TS := $(date +'"%Y%m%d_%H%M%S"')
 
 ASFLAGS = -c -mcpu=cortex-m0
-CFLAGS = -Os -Wall -Wno-error -mcpu=cortex-m0 -fno-builtin -fshort-enums -fno-delete-null-pointer-checks -Wno-error=incompatible-pointer-types -std=c2x -MMD -flto=auto -Wextra
+CFLAGS = -Os -Wall -Wno-error -mcpu=cortex-m0 -fno-builtin -fshort-enums -fno-delete-null-pointer-checks -Wno-error=incompatible-pointer-types -std=c2x -MMD -flto=auto -Wextra 
 CFLAGS += -DPRINTF_INCLUDE_CONFIG_H
 CFLAGS += -DGIT_HASH=\"$(GIT_HASH)\"
 CFLAGS += -DTIME_STAMP=\"$(TS)\"
@@ -49,7 +49,7 @@ DEPS = $(OBJS:.o=.d)
 .PHONY: all clean
 
 all: $(TARGET)
-	$(OBJCOPY) -O binary $< $<.bin
+	$(OBJCOPY) --strip-all --strip-debug --strip-dwo --strip-unneeded -O binary $< $<.bin
 	-python fw-pack.py $<.bin $(GIT_HASH) $<.packed.bin
 	-python3 fw-pack.py $<.bin $(GIT_HASH) $<.packed.bin
 	$(SIZE) $<

@@ -177,10 +177,10 @@ static void initChannelScan() {
 }
 
 static void startScan() {
-  if (radio->channel >= 0) {
+  if (RADIO_VfoIsCH()) {
     initChannelScan();
   }
-  if (radio->channel >= 0 && gScanlistSize == 0) {
+  if (RADIO_VfoIsCH() && gScanlistSize == 0) {
     SVC_Toggle(SVC_SCAN, false, 0);
     return;
   }
@@ -314,7 +314,7 @@ bool VFOPRO_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
 
 bool VFO1_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
   if (!SVC_Running(SVC_SCAN) && !bKeyPressed && !bKeyHeld &&
-      radio->channel >= 0) {
+      RADIO_VfoIsCH()) {
     if (!gIsNumNavInput && key <= KEY_9) {
       NUMNAV_Init(radio->channel + 1, 1, CHANNELS_GetCountMax());
       gNumNavCallback = setChannel;
@@ -551,67 +551,111 @@ static void DrawRegs(void) {
   }
 }
 
+// Render VFO 1 
 //---------------------------------------------------------------------------
 void VFO1_render(void) 
-  {
-    const uint8_t BASE = 42;
+  {  
+    // Base Y-coordinate for rendering UI elements
+    const uint8_t BASE = 42;  
 
+    VFO *vfo = &gVFO[gSettings.activeVFO];           // Get pointer to the active VFO
+    Preset *p = gVFOPresets[gSettings.activeVFO];    // Get pointer to the preset for the active VFO
+    uint32_t rx_f = vfo->rx.f;                       // Retrieve the frequency for receiving
+    uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(rx_f);  // Determine the current frequency based on TX state
+
+    uint16_t fp1 = f / MHZ;           // Frequency in MHz
+    uint16_t fp2 = f / 100 % 1000;    // Frequency in kHz
+    uint8_t fp3 = f % 100;            // Frequency in Hz
+    ModulationType vfo_mod = vfo->modulation;        // Get the modulation type of the active VFO
+    ModulationType band_mod = p->band.modulation;    // Get the modulation type of the current band
+    const char *mod = modulationTypeOptions[vfo_mod == MOD_PRST ? band_mod : vfo_mod];    // Determine which modulation type to display
+    uint8_t activeVFO = gSettings.activeVFO;         // Store the active VFO index
+
+    // Update the status line based on user input or current preset
     if (gIsNumNavInput) 
       {
-        STATUSLINE_SetText("Select: %s", gNumNavInput);
+        // Display selected input if in number navigation mode
+        STATUSLINE_SetText("Select: %s", gNumNavInput);  
       } 
     else 
       {
+        // Display the current band name and channel number
         STATUSLINE_SetText( "%s:%u", 
-                            gCurrentPreset->band.name,
-                            PRESETS_GetChannel(gCurrentPreset, radio->rx.f) + 1
+                            gCurrentPreset->band.name,  
+                            PRESETS_GetChannel(gCurrentPreset, rx_f) + 1 
                           );
       }
- 
-    VFO *vfo = &gVFO[gSettings.activeVFO];
-    Preset *p = gVFOPresets[gSettings.activeVFO];
-    uint32_t f = gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(vfo->rx.f);
-
-    uint16_t fp1 = f / MHZ;
-    uint16_t fp2 = f / 100 % 1000;
-    uint8_t fp3 = f % 100;
-    ModulationType vfo_mod = vfo->modulation;
-    ModulationType band_mod = p->band.modulation;
-    const char *mod = modulationTypeOptions[   vfo_mod == MOD_PRST 
-                                             ? band_mod
-                                             : vfo_mod
-                                           ];
                                            
-                                           
-    UI_RSSIBar(gLoot[gSettings.activeVFO].rssi, RADIO_GetSNR(), vfo->rx.f, BASE + 2);
+    // Render the RSSI bar for the active VFO
+    UI_RSSIBar(gLoot[activeVFO].rssi, RADIO_GetSNR(), rx_f, /*BASE+2*/45);  
 
-    if (radio->channel >= 0) 
+    // Check if the current VFO is in channel mode
+    if (RADIO_VfoIsCH()) 
       {
-        PrintMediumEx(LCD_WIDTH - 25, BASE - 15, POS_R, C_FILL, gVFONames[gSettings.activeVFO]);
+        PrintMediumEx(/*LCD_WIDTH-25*/103, /*BASE-15*/27, POS_R, C_FILL, gVFONames[activeVFO]);  
       }
-
+      
+    // Handle the transmission state
     if (gTxState && gTxState != TX_ON) 
       {
-        PrintMediumBoldEx(LCD_XCENTER, BASE, POS_C, C_FILL, "%s", TX_STATE_NAMES[gTxState]);
+        FillRect(24, /*BASE-22*/20, 17, 9, C_FILL);                     // Fill a rectangle indicating TX mode
+        PrintMediumBoldEx(25, /*BASE-15*/27, POS_L, C_INVERT, "TX");    // Display "TX" indicator
+
+        // Display the specific TX state if not in TX_ON
+        if (gTxState != TX_ON)
+          {
+            // Show detailed TX state
+            PrintMediumBoldEx(LCD_XCENTER, BASE, POS_C, C_FILL, "%s", TX_STATE_NAMES[gTxState]);  
+          }
       } 
     else 
       {
-        PrintBiggestDigitsEx(LCD_WIDTH - 21, BASE, POS_R, C_FILL, "%4u.%03u", fp1, fp2);
-        PrintBigDigitsEx(LCD_WIDTH, BASE, POS_R, C_FILL, "%02u", fp3);
+        // Display the frequency
+        PrintBiggestDigitsEx(/*LCD_WIDTH-21*/107, BASE, POS_R, C_FILL, "%4u.%03u", fp1, fp2);    // Display MHz and kHz
+        PrintBigDigitsEx(LCD_WIDTH, BASE, POS_R, C_FILL, "%02u", fp3);                           // Display Hz
         
-        PrintMediumEx(LCD_WIDTH - 2, BASE - 13, POS_R, C_FILL, mod);        
+        // Display the modulation type
+        PrintMediumEx(/*LCD_WIDTH-2*/126, /*BASE-13*/29, POS_R, C_FILL, mod); 
+        // Indicate if the current modulation differs from the band modulation
         if (vfo_mod != MOD_PRST && vfo_mod != band_mod) 
           {
-            FillRect(LCD_WIDTH - 20, BASE - 20, 20, 9, C_INVERT);
+            FillRect(/*LCD_WIDTH-20*/108, /*BASE-20*/22, 20, 9, C_INVERT); 
           }
       }
-
-    if (gVfo1ProMode) {    
-    DrawRegs();
+      
+    // Check if the device is listening
+    if (gIsListening)
+      {
+        FillRect(24, /*BASE-22*/20, 17, 9, C_FILL);                     // Fill a rectangle indicating RX mode
+        PrintMediumBoldEx(25, /*BASE-15*/27, POS_L, C_INVERT, "RX");    // Display "RX" indicator
+      }
+      
+    // Check if in pro mode for additional functionality
+    if (gVfo1ProMode) 
+      {    
+        DrawRegs();    // Draw additional register information if in pro mode
+      }
+    else
+      {
+        // Fill a rectangle for VFO/channel A & B
+        FillRect(0 + 44 * activeVFO, /*LCD_HEIGHT-9*/55, 43, 9, C_FILL);    
+        for (int i = 0; i < 2; i++)
+          {
+            // Display channel number if it exists
+            if (gVFO[i].channel >= 0) 
+              {
+                PrintMediumEx(1 + i * 45, /*LCD_HEIGHT-2*/62, POS_L, C_INVERT, "CH-%u", gVFO[i].channel + 1); 
+              }
+            else
+              {
+                // Otherwise display the VFO identifier
+                PrintMediumBoldEx(1 + i * 45, /*LCD_HEIGHT-2*/62, POS_L, C_INVERT, "VFO-%c", 'A' + i); 
+              }
+        }
     }
-    
-    
-    UI_FSmall(gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(radio->rx.f));
+
+    // Update the small frequency display at the bottom
+    UI_FSmall(gTxState == TX_ON ? RADIO_GetTXF() : GetScreenF(rx_f)); 
   }
 
 //---------------------------------------------------------------------------

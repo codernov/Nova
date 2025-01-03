@@ -92,8 +92,8 @@ const App apps[APPS_COUNT] = {
     {"2 VFO", VFO2_init, VFO2_update, VFO2_render, VFO2_key, NULL},
 //    {"Generator", GENERATOR_init, GENERATOR_update, GENERATOR_render,
 //     GENERATOR_key, NULL},
-    // {"Level", LEVEL_init, LEVEL_update, LEVEL_render, LEVEL_key,
-    // LEVEL_deinit},
+//     {"Level", LEVEL_init, LEVEL_update, LEVEL_render, LEVEL_key,
+//     LEVEL_deinit},
 //    {"ABOUT", NULL, NULL, ABOUT_Render, ABOUT_key, NULL},
 };
 

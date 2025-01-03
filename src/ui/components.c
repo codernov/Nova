@@ -122,6 +122,7 @@ void UI_FSmall(uint32_t f) {
                
   const uint32_t step = StepFrequencyTable[gCurrentPreset->band.step];
   PrintSmallEx(0, 35, POS_L, C_FILL, "%d.%02dk", step / 100, step % 100);
+
 }
 
 
