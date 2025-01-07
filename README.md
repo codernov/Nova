@@ -1,10 +1,7 @@
-# DN // dv0rn1c-n0va
-**Firmware for Quansheng UV-K5 by Codernov Electronics Repair, a fork of r3b0rn from fagci**  
+# Codernov Electronics Repair; Firmware for Quansheng UV-K5
+**Firmware for Quansheng UV-K5 by Codernov Electronics Repair, forked from r3b0rn**  
   
-At Codernov Electronics Repair, we recognize that the intention behind r3b0rn is commendable; however, we believe that the current concept and execution lack the precision and reliability needed for optimal performance. Therefore, we are committed to rethinking the underlying functionality of the firmware. Our goal is to deliver a robust, reliable, and bug-free solution that stands out and rivals the best in the industry.  
-
-"Dvornik" is a common call sign used by radio hooligans.  
-dv0rn1c-n0va is a proper leet hacker firmware. 
+At Codernov Electronics Repair, we recognize the commendable intentions behind the r3b0rn project; however, we believe that the current concept and execution lack the precision and reliability necessary for optimal performance. Our commitment is to rethink the underlying functionality of the firmware to deliver a robust, reliable, and bug-free solution that stands out and rivals the best in the industry.
 
 ## License  
-We believe that source code should always be accessible, as this fosters progress and innovation. For this reason, our license is GPL-3.0.  
+We believe that source code should always be accessible, as this fosters progress and innovation. For this reason, our license is GPL-3.0.
