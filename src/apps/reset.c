@@ -21,13 +21,13 @@ static EEPROMType eepromType;
 
 static VFO defaultVFOs[2] = {
     (VFO){
-        .rx.f = 14550000,
+        .rx.f = 44609375,
         .channel = -1,
         .modulation = MOD_PRST,
         .radio = RADIO_UNKNOWN,
     },
     (VFO){
-        .rx.f = 43307500,
+        .rx.f = 46261250,
         .channel = -1,
         .modulation = MOD_PRST,
         .radio = RADIO_UNKNOWN,
@@ -49,6 +49,7 @@ static void startReset(EEPROMType t) {
 void RESET_Init(void) {
   gSettings.keylock = false;
   eepromType = EEPROM_A;
+  BACKLIGHT_SetDuration(255);
 }
 
 void RESET_Update(void) {
@@ -94,13 +95,13 @@ void RESET_Render(void) {
   if (eepromType < EEPROM_BL24C64) {
     for (uint8_t t = EEPROM_BL24C64; t <= EEPROM_M24M02; t++) {
       uint8_t i = t - EEPROM_BL24C64;
-      PrintMedium(2, 18 + i * 8, "%u: %s", i + 1, EEPROM_TYPE_NAMES[t]);
+      PrintMedium(55, 14 + i * 8, "%u:  %s", i + 1, EEPROM_TYPE_NAMES[t]);
     }
     return;
   }
 
-  DrawRect(0, POS_Y, LCD_WIDTH, 10, C_FILL);
-  FillRect(1, POS_Y, progressX, 10, C_FILL);
+  DrawRect(0, POS_Y, LCD_WIDTH, 11, C_FILL);
+  FillRect(1, POS_Y, progressX, 11, C_FILL);
   PrintMedium(0, 16, "%u/%u", channelsWrote, channelsMax);
   PrintMedium(0, 24, "%lu", bytesMax);
   PrintMediumEx(LCD_XCENTER, POS_Y + 8, POS_C, C_INVERT, "%u%",
@@ -117,3 +118,25 @@ bool RESET_key(KEY_Code_t k, bool bKeyPressed, bool bKeyHeld) {
   }
   return false;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

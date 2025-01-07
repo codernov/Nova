@@ -1,6 +1,7 @@
 #include "svc_sys.h"
 #include "driver/backlight.h"
 #include "ui/statusline.h"
+#include "settings.h"
 
 void SVC_SYS_Init(void) {}
 void SVC_SYS_Update(void) {

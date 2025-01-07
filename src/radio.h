@@ -27,6 +27,7 @@ extern char gVFONames[2][10];
 
 extern bool gIsListening;
 extern bool gMonitorMode;
+extern uint8_t gCurrentTxPower;
 extern TXState gTxState;
 extern bool gShowAllRSSI;
 

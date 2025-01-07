@@ -7,6 +7,8 @@
 
 #define getsize(V) char (*__ #V)(void)[sizeof(V)] = 1;
 
+extern const char gVersionStr[];
+
 typedef struct {
   int8_t lastActiveVFO : 2;
   uint8_t activityOnVFO : 1; // activity on VFO#
@@ -119,7 +121,9 @@ extern const uint32_t EEPROM_SIZES[8];
 typedef struct {
   EEPROMType eepromType : 3;
   uint8_t checkbyte : 5;
-  uint8_t reserved0 : 4;
+  uint8_t reserved0 : 2;
+  uint8_t compander : 1;
+  uint8_t errorBeep : 1;
   uint8_t scrambler : 4;
   uint8_t batsave : 4;
   uint8_t vox : 4;
@@ -128,7 +132,7 @@ typedef struct {
   uint8_t micGain : 4;
   uint8_t currentScanlist : 4;
   uint8_t iAmPro : 1;
-  uint8_t reserved2 : 1;
+  uint8_t startUpBeep : 1;
   uint8_t roger : 2;
   uint8_t scanmode : 2;
   CHDisplayMode chDisplayMode : 2;

@@ -64,7 +64,7 @@ const AppType_t appsAvailableToRun[RUN_APPS_COUNT] = {
     APP_PRESETS_LIST, //
     APP_MEMVIEW,      //
 //    APP_GENERATOR,    //
-//     APP_LEVEL,        //
+//    APP_LEVEL,        //
 //    APP_ABOUT, //
 };
 

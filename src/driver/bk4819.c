@@ -117,7 +117,9 @@ inline uint16_t scale_freq(const uint16_t freq) {
   return (((uint32_t)freq * 1353245u) + (1u << 16)) >> 17; // with rounding
 }
 
-void BK4819_Idle(void) { BK4819_WriteRegister(BK4819_REG_30, 0x0000); }
+void BK4819_Idle(void) { 
+BK4819_WriteRegister(BK4819_REG_30, 0x0000); 
+}
 
 void BK4819_Init(void) {
   GPIO_SetBit(&GPIOC->DATA, GPIOC_PIN_BK4819_SCN);

@@ -34,6 +34,7 @@ char gVFONames[2][10] = {0};
 
 bool gIsListening = false;
 bool gMonitorMode = false;
+uint8_t gCurrentTxPower = 0;
 TXState gTxState = TX_UNKNOWN;
 bool gShowAllRSSI = false;
 
@@ -457,7 +458,7 @@ void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
   if (gTxState == on) {
     return;
   }
-
+  
   gTxState = on ? RADIO_GetTXState(txF) : TX_UNKNOWN;
 
   if (gTxState == TX_ON) {
@@ -473,6 +474,7 @@ void RADIO_ToggleTXEX(bool on, uint32_t txF, uint8_t power, bool paEnabled) {
     SYSTEM_DelayMs(10);
     BK4819_ToggleGpioOut(BK4819_GPIO1_PIN29_PA_ENABLE, paEnabled);
     SYSTEM_DelayMs(5);
+    gCurrentTxPower = power;
     BK4819_SetupPowerAmplifier(power, txF);
     SYSTEM_DelayMs(10);
 

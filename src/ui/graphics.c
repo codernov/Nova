@@ -341,3 +341,22 @@ void PrintSymbolsEx(uint8_t x, uint8_t y, TextPos posLCR, Color color,
   printString(&Symbols, x, y, color, posLCR, pattern, args);
   va_end(args);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

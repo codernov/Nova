@@ -538,7 +538,7 @@ Preset
                         .bw = BK4819_FILTER_BW_NARROW,
                     },
                 .lastUsedFreq = 2800000,
-            },
+            }
 };
 // char (*__defpres)[sizeof(defaultPresets)/sizeof(Preset)] = 1;
 

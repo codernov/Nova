@@ -55,6 +55,7 @@ void STATUSLINE_update(void) {
 }
 
 void STATUSLINE_render(void) {
+
   UI_ClearStatus();
 
   const uint8_t BASE_Y = 4;

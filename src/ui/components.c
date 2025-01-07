@@ -2,6 +2,7 @@
 #include "../driver/st7565.h"
 #include "../helper/measurements.h"
 #include "../helper/presetlist.h"
+#include "../apps/vfo1.h"
 #include "graphics.h"
 #include <stdint.h>
 
@@ -16,6 +17,42 @@ void UI_Battery(uint8_t Level) {
     DrawHLine(LCD_WIDTH - 1 - 3, 3, 3, C_INVERT);
   }
 }
+
+//---------------------------------------------------------------------------
+void UI_TxBar(uint8_t y) 
+  {
+    //const uint8_t BAR_LEFT_MARGIN = 0;
+    //const uint8_t BAR_WIDTH = LCD_WIDTH - BAR_LEFT_MARGIN - 22;  
+    uint16_t level = MIN((unsigned int)BK4819_GetVoiceAmplitude() * 8, 65535u);
+    uint8_t audioW = ConvertDomain(MIN((unsigned int)SQRT16(level), 124u), 0, 124, 0, 64);
+    uint8_t mic = BK4819_GetRegValue(registerSpecs[11]);
+        
+
+    PrintSmall(0, y + 6, "%u.%u dB", mic >> 1, (mic & 1) ? 5 : 0);
+    PrintMediumEx(LCD_WIDTH, y + 7, POS_R, C_FILL, "%u:%c", gCurrentTxPower, TX_POWER_NAMES[gCurrentPreset->power][0]);
+   
+    FillRect(28, y + 2, audioW, 3, C_FILL);
+    FillRect(28, y + 6, 64, 1, C_FILL);
+  }
+
+
+
+
+unsigned int SQRT16(unsigned int value) {
+  unsigned int shift = 16; // number of bits supplied in 'value' .. 2 ~ 32
+  unsigned int bit = 1u << --shift;
+  unsigned int sqrti = 0;
+  while (bit) {
+    const unsigned int temp = ((sqrti << 1) | bit) << shift--;
+    if (value >= temp) {
+      value -= temp;
+      sqrti |= bit;
+    }
+    bit >>= 1;
+  }
+  return sqrti;
+}
+
 
 //---------------------------------------------------------------------------
 void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y) 
@@ -62,16 +99,16 @@ void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y)
     if (!gIsListening)
       return;
       
-    PrintMediumEx(LCD_WIDTH - 1, BAR_BASE, 2, true, "%d", Rssi2DBm(rssi));
+//    PrintMediumEx(LCD_WIDTH - 1, BAR_BASE, 2, true, "%d", Rssi2DBm(rssi));
 
     uint8_t dBm = Rssi2DBm(rssi)*-1;
     uint8_t dBmMax6 = (f>=3000000) ? 93 : 73;
     uint8_t dBmMax10 = (f>=3000000) ? 33 : 13;
 
   
-    if ((gIsListening || dBmMax6==73) && dBm>0 && dBm<(dBmMax6+49) && y==44) 
+//    if ((gIsListening || dBmMax6==73) && dBm>0 && dBm<(dBmMax6+49) && y==44) 
       { // active or <30mhz & 1VFO mode - (in 1VFO y=BASE+2)
-        if(dBm>(dBmMax6-10))
+/*        if(dBm>(dBmMax6-10))
           { 
             uint8_t s=((dBm-dBmMax6)/6)+(1*((dBm-dBmMax6)%6)>0); 
             if (dBm<dBmMax6) 
@@ -80,7 +117,7 @@ void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y)
             PrintMediumEx(LCD_WIDTH - 1, LCD_HEIGHT - 4, POS_R, C_FILL, "S%u", 9-s);
           } 
         else 
-          {
+*/          {
             uint8_t s=((dBm-dBmMax10)/10)+(1*((dBm-dBmMax10)%10)>0); 
             if (dBm<dBmMax10) 
               s=0;
@@ -94,34 +131,47 @@ void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y)
 void UI_FSmall(uint32_t f) {
   SQL sq = GetSql(gCurrentPreset->band.squelch);
 
-  PrintSmall(0, 18, "%u", RADIO_GetRSSI());
-  PrintSmall(38, 18, "%u", BK4819_GetNoise());
-  PrintSmall(76, 18, "%u", BK4819_GetGlitch());
+//  PrintSmall(0, 18, "%u", RADIO_GetRSSI());
+//  PrintSmall(38, 18, "%u", BK4819_GetNoise());
+//  PrintSmall(76, 18, "%u", BK4819_GetGlitch());
 
-  PrintSmall(0, 12,"%u/%u", sq.ro, sq.rc);
-  PrintSmall(38, 12,"%u/%u", sq.no, sq.nc);
-  PrintSmall(76, 12,"%u/%u", sq.go, sq.gc);
+//  PrintSmall(0, 18, "%u : %u : %u", RADIO_GetRSSI(), BK4819_GetNoise(), BK4819_GetGlitch());
 
-  PrintMediumEx(LCD_WIDTH, 14, POS_R, C_FILL, "%u", RADIO_GetSNR());
+//  PrintSmall(0, 12,"%u/%u", sq.ro, sq.rc);
+//  PrintSmall(38, 12,"%u/%u", sq.no, sq.nc);
+//  PrintSmall(76, 12,"%u/%u", sq.go, sq.gc);
 
-  PrintSmallEx(LCD_WIDTH, 20, POS_R, true,
-               RADIO_GetBWName(gCurrentPreset->band.bw));
+//  PrintSmall(0, 12, "%u/%u : %u/%u : %u/%u", sq.ro, sq.rc, sq.no, sq.nc, sq.go, sq.gc);
+
+
+
+
+  
+
+  const uint32_t step = StepFrequencyTable[gCurrentPreset->band.step];
+  PrintSmallEx(LCD_WIDTH, 12, POS_R, C_FILL, "%d.%02dk", step / 100, step % 100);
+
+  PrintSmallEx(LCD_WIDTH, 21, POS_R, true, RADIO_GetBWName(gCurrentPreset->band.bw));
+ 
+  
+  PrintSmall(0, 23, "AFC %u", BK4819_GetAFC());
+ 
    
   if (gCurrentPreset->band.gainIndex != AUTO_GAIN_INDEX) 
-    {
-      PrintSmall(0, 29, "%+ddB", -gainTable[gCurrentPreset->band.gainIndex].gainDb + 33);
+    {      
+      PrintMedium(0, 31, "MAN%+d", -gainTable[gCurrentPreset->band.gainIndex].gainDb + 33);
     }
   else
     {
-      PrintSmall(0, 29, "AUTO");
+      PrintMedium(0, 31, "AUT");
     }
-
+    
+//PrintSmallEx(0, 38, POS_L, C_FILL, "%d.%02dk", step / 100, step % 100);
 
                
-  PrintMedium(0, 43, "%s %u", sqTypeNames[gCurrentPreset->band.squelchType], gCurrentPreset->band.squelch);
+  PrintSmall(0, 37, "%s %u", sqTypeNames[gCurrentPreset->band.squelchType], gCurrentPreset->band.squelch);
                
-  const uint32_t step = StepFrequencyTable[gCurrentPreset->band.step];
-  PrintSmallEx(0, 35, POS_L, C_FILL, "%d.%02dk", step / 100, step % 100);
+  PrintSmallEx(0, 43, POS_L, C_INVERT, "SNR  %u", RADIO_GetSNR());
 
 }
 

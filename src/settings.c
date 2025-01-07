@@ -6,6 +6,8 @@
 Settings gSettings;
 DwState gDW;
 
+const char gVersionStr[] = "0.1.1_devel";
+
 uint8_t BL_TIME_VALUES[7] = {0, 5, 10, 20, 60, 120, 255};
 const char *BL_TIME_NAMES[7] = {"Off",  "5s",   "10s", "20s",
                                 "1min", "2min", "On"};
@@ -24,13 +26,14 @@ const char *EEPROM_TYPE_NAMES[8] = {
     "BL24C128",  // 011
     "BL24C256",  // 100
     "BL24C512",  // 101
-    "BL24C1024", // 110
+    "M24M01",    // 110
     "M24M02",    // 111
 };
 
 Settings defaultSettings = (Settings){
     .eepromType = EEPROM_BL24C64,
     .scrambler = 0,
+    .compander = 1,
     .batsave = 4,
     .vox = 0,
     .backlight = 3,
@@ -43,6 +46,8 @@ Settings defaultSettings = (Settings){
     .dw = false,
     .crossBandScan = false,
     .beep = false,
+    .startUpBeep = true,
+    .errorBeep = true,
     .keylock = false,
     .busyChannelTxLock = false,
     .ste = true,

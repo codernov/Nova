@@ -1,5 +1,6 @@
 #include "scheduler.h"
 
+
 static uint32_t elapsedMilliseconds = 0;
 
 Task tasks[TASKS_MAX];

@@ -1,9 +1,12 @@
 #ifndef VFO1_APP_H
 #define VFO1_APP_H
 
+#include "../driver/bk4819-regs.h"
 #include "../driver/keyboard.h"
 #include <stdbool.h>
 #include <stdint.h>
+
+extern const RegisterSpec registerSpecs[];
 
 void VFO1_init();
 void VFO1_update();

@@ -51,39 +51,53 @@ static void unreborn(void) {
   for (uint16_t i = 0; i < EEPROM_SIZE; i += PAGE_SIZE) {
     EEPROM_WriteBuffer(i, tpl, PAGE_SIZE);
     UI_ClearScreen();
-    PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xFFing... %u",
+    PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xff\'ing... %u",
                   i * 100 / EEPROM_SIZE);
-    ST7565_Blit();
+    ST7565_Blit();    
   }
 
   UI_ClearScreen();
-  PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xFFed !!!");
+  PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xff\'ed !!!");
   ST7565_Blit();
 
+  AUDIO_PlayTone(1200, 68);
+  AUDIO_PlayTone(1200, 68);
+  
   while (true)
     continue;
 }
 
+
+
 static void Intro(void) {
   UI_ClearScreen();
-  PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "r3b0rn");
+  PrintMediumBoldEx(30, 17, POS_L, C_FILL, "Codernov");
+  PrintMediumBoldEx(30, 27, POS_L, C_FILL, "Electronics");
+  PrintMediumBoldEx(30, 37, POS_L, C_FILL, "Repair");
+  PrintSmallEx(10, 49, POS_L, C_FILL, "%ver. %s", gVersionStr);
+  FillRect(20, 11, 4, 27, C_FILL);
   ST7565_Blit();
-
+  
+  SYSTEM_DelayMs(45);
+  
   if (PRESETS_Load()) {
-    if (gSettings.beep) {
-      AUDIO_PlayTone(1400, 50);
+    if (gSettings.startUpBeep) {
+      AUDIO_PlayTone(850, 68);
     }
 
+  
+
+
     UI_ClearScreen();
-    PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "(^__^)");
+    PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "-@-@-");
     ST7565_Blit();
 
     TaskRemove(Intro);
 
     Boot(gSettings.mainApp);
 
-    if (gSettings.beep) {
-      AUDIO_PlayTone(1400, 50);
+    if (gSettings.startUpBeep) {
+      AUDIO_PlayTone(850, 68);
     }
   }
 }
@@ -105,8 +119,9 @@ void Main(void) {
   }
 
   UI_ClearScreen();
-  PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "(X__X)");
+  PrintMediumBoldEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "(-.-)Zzz..."); 
   ST7565_Blit();
+  
 
   SETTINGS_Load();
   if (gSettings.batteryCalibration > 2154 ||
@@ -134,3 +149,25 @@ void Main(void) {
     TasksUpdate(); // TODO: check if delay not needed or something
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -7,7 +7,19 @@
 
 #define BATTERY_W 13
 
+
+#define MIN(a, b)                                                              \
+  ({                                                                           \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a < _b ? _a : _b;                                                         \
+  })
+
+unsigned int SQRT16(unsigned int value);
+
+
 void UI_Battery(uint8_t Level);
+void UI_TxBar(uint8_t y);
 void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y);
 void UI_FSmall(uint32_t f);
 void UI_FSmallest(uint32_t f, uint8_t x, uint8_t y);

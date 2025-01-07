@@ -13,9 +13,12 @@
 #include "../svc_scan.h"
 #include "../ui/components.h"
 #include "../ui/graphics.h"
+#include "../ui/menu.h"
 #include "apps.h"
 #include "finput.h"
 #include "../ui/statusline.h"
+#include "level.h"
+#include "../dcs.h"
 
 
 bool gVfo1ProMode = false;
@@ -25,21 +28,21 @@ static bool registerActive = false;
 
 static char String[16];
 
-static const RegisterSpec registerSpecs[] = {
+const RegisterSpec registerSpecs[] = {
     {"Gain", BK4819_REG_13, 0, 0xFFFF, 1},
-    /* {"RF", BK4819_REG_43, 12, 0b111, 1},
-    {"RFwe", BK4819_REG_43, 9, 0b111, 1}, */
+    {"RF", BK4819_REG_43, 12, 0b111, 1},
+    {"RFwe", BK4819_REG_43, 9, 0b111, 1}, 
 
-    // {"IF", 0x3D, 0, 0xFFFF, 100},
+    {"IF", 0x3D, 0, 0xFFFF, 100},
 
     {"DEV", 0x40, 0, 0xFFF, 10},
-    // {"300T", 0x44, 0, 0xFFFF, 1000},
+    {"300T", 0x44, 0, 0xFFFF, 1000},
     RS_RF_FILT_BW,
     RS_XTAL_MODE,
-    // {"AFTxfl", 0x43, 6, 0b111, 1}, // 7 is widest
-    // {"3kAFrsp", 0x74, 0, 0xFFFF, 100},
+    {"AFTxfl", 0x43, 6, 0b111, 1}, // 7 is widest
+    {"3kAFrsp", 0x74, 0, 0xFFFF, 100},
     {"CMP", 0x31, 3, 1, 1},
-    {"MIC", 0x7D, 0, 0xF, 1},
+    {"MIC", 0x7D, 0, 0x1F, 1},
 
     {"AGCL", 0x49, 0, 0b1111111, 1},
     {"AGCH", 0x49, 7, 0b1111111, 1},
@@ -109,7 +112,22 @@ void VFO1_init(void) {
   RADIO_LoadCurrentVFO();
 }
 
+//static uint32_t lastUpdate = 0;
+//static Loot msm;
+
 void VFO1_update(void) {
+
+//  if (Now() - lastUpdate > 50) {
+//    lastUpdate = Now();
+//    msm.rssi = RADIO_GetRSSI();
+//    SP_Shift(-1);
+//    SP_AddGraphPoint(&msm);
+//    gRedrawScreen = true;
+//  }
+
+//  LEVEL_update();
+gRedrawScreen = true;
+
   if (SSB_Seek_ON) {
     if (RADIO_GetRadio() == RADIO_SI4732 && RADIO_IsSSB()) {
       if (Now() - gLastRender >= 150) {
@@ -290,14 +308,14 @@ bool VFOPRO_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
       if (registerActive) {
         UpdateRegMenuValue(registerSpecs[menuIndex], true);
       } else {
-        IncDec8(&menuIndex, 0, ARRAY_SIZE(registerSpecs) - 1, -1);
+        IncDec8(&menuIndex, 0, ARRAY_SIZE(registerSpecs), -1);
       }
       return true;
     case KEY_8:
       if (registerActive) {
         UpdateRegMenuValue(registerSpecs[menuIndex], false);
       } else {
-        IncDec8(&menuIndex, 0, ARRAY_SIZE(registerSpecs) - 1, 1);
+        IncDec8(&menuIndex, 0, ARRAY_SIZE(registerSpecs), 1);
       }
       return true;
     case KEY_5:
@@ -331,7 +349,7 @@ bool VFO1_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
 
   if (key == KEY_PTT && !gIsNumNavInput) {
     RADIO_ToggleTX(bKeyHeld);
-    RADIO_ToggleVfoMR();
+    //RADIO_ToggleVfoMR();
     return true;
   }
 
@@ -412,7 +430,8 @@ bool VFO1_key(KEY_Code_t key, bool bKeyPressed, bool bKeyHeld) {
       RADIO_ToggleTxPower();
       return true;
     case KEY_7:
-      RADIO_UpdateStep(true);
+      //RADIO_UpdateStep(true);
+      //APPS_run(APP_LEVEL);
       return true;
     case KEY_8:
       IncDec8(&offsetDirection, 0, OFFSET_MINUS, 1);
@@ -539,7 +558,7 @@ static void DrawRegs(void) {
     if (afc) {
       sprintf(String, "%u", afc);
     } else {
-      sprintf(String, "off");
+      sprintf(String, onOff[0]);
     }
   } else {
     sprintf(String, "%u", BK4819_GetRegValue(rs));
@@ -558,6 +577,8 @@ void VFO1_render(void)
     // Base Y-coordinate for rendering UI elements
     const uint8_t BASE = 42;  
 
+    char name[10];
+    const Loot *loot = &gLoot[gSettings.activeVFO];
     VFO *vfo = &gVFO[gSettings.activeVFO];           // Get pointer to the active VFO
     Preset *p = gVFOPresets[gSettings.activeVFO];    // Get pointer to the preset for the active VFO
     uint32_t rx_f = vfo->rx.f;                       // Retrieve the frequency for receiving
@@ -586,49 +607,117 @@ void VFO1_render(void)
                           );
       }
                                            
-    // Render the RSSI bar for the active VFO
-    UI_RSSIBar(gLoot[activeVFO].rssi, RADIO_GetSNR(), rx_f, /*BASE+2*/45);  
+
 
     // Check if the current VFO is in channel mode
     if (RADIO_VfoIsCH()) 
       {
-        PrintMediumEx(/*LCD_WIDTH-25*/103, /*BASE-15*/27, POS_R, C_FILL, gVFONames[activeVFO]);  
+        PrintMediumEx(/*LCD_WIDTH-23*/105, 28, POS_R, C_FILL, gVFONames[activeVFO]);  
+      }
+//    else if (vfo->tx.f)
+//      {
+//        PrintMediumEx( /*LCD_WIDTH-23*/105, 28, POS_R, C_FILL, 
+//                      "TX %4u.%03u.%02u", 
+//                      vfo->tx.f / MHZ, 
+//                      vfo->tx.f / 100 % 1000, 
+//                      vfo->tx.f % 100
+//                    );
+//      }
+      
+    switch(gTxState)
+      {
+        case TX_UNKNOWN:
+          break;
+          
+        case TX_ON:
+            FillRect(35, 8, 17, 9, C_FILL);                      // Fill a rectangle indicating TX mode
+            PrintMediumBoldEx(36, 15, POS_L, C_INVERT, "TX");    // Display "TX" indicator    
+            UI_TxBar(/*BASE+2*/45);              
+          break;
+      
+        default:
+            FillRect(0, /*BASE+3*/45, LCD_WIDTH, 9, C_FILL);
+            PrintMediumBoldEx(40, /*BASE+10*/52, POS_L, C_INVERT, "%s", TX_STATE_NAMES[gTxState]);
+            if (gSettings.errorBeep) 
+              AUDIO_PlayTone(450, 100);
+          break;  
       }
       
-    // Handle the transmission state
-    if (gTxState && gTxState != TX_ON) 
-      {
-        FillRect(24, /*BASE-22*/20, 17, 9, C_FILL);                     // Fill a rectangle indicating TX mode
-        PrintMediumBoldEx(25, /*BASE-15*/27, POS_L, C_INVERT, "TX");    // Display "TX" indicator
-
-        // Display the specific TX state if not in TX_ON
-        if (gTxState != TX_ON)
-          {
-            // Show detailed TX state
-            PrintMediumBoldEx(LCD_XCENTER, BASE, POS_C, C_FILL, "%s", TX_STATE_NAMES[gTxState]);  
-          }
-      } 
-    else 
-      {
-        // Display the frequency
-        PrintBiggestDigitsEx(/*LCD_WIDTH-21*/107, BASE, POS_R, C_FILL, "%4u.%03u", fp1, fp2);    // Display MHz and kHz
-        PrintBigDigitsEx(LCD_WIDTH, BASE, POS_R, C_FILL, "%02u", fp3);                           // Display Hz
+    // Display the frequency
+    PrintBiggestDigitsEx(/*LCD_WIDTH-21*/107, /*BASE+1*/43, POS_R, C_FILL, "%4u.%03u", fp1, fp2);    // Display MHz and kHz
+    PrintBigDigitsEx(LCD_WIDTH, /*BASE+1*/43, POS_R, C_FILL, "%02u", fp3);                           // Display Hz
         
-        // Display the modulation type
-        PrintMediumEx(/*LCD_WIDTH-2*/126, /*BASE-13*/29, POS_R, C_FILL, mod); 
-        // Indicate if the current modulation differs from the band modulation
-        if (vfo_mod != MOD_PRST && vfo_mod != band_mod) 
-          {
-            FillRect(/*LCD_WIDTH-20*/108, /*BASE-20*/22, 20, 9, C_INVERT); 
-          }
+    // Display the modulation type
+    PrintMediumEx(/*LCD_WIDTH-2*/126, /*BASE-12*/30, POS_R, C_FILL, mod); 
+    // Indicate if the current modulation differs from the band modulation
+    if (vfo_mod != MOD_PRST && vfo_mod != band_mod) 
+      {
+        FillRect(/*LCD_WIDTH-20*/108, /*BASE-20*/23, 20, 9, C_INVERT); 
       }
       
-    // Check if the device is listening
-    if (gIsListening)
+    //SP_RenderGraph();
+    
+    
+    
+    if (gTxState == TX_UNKNOWN)
       {
-        FillRect(24, /*BASE-22*/20, 17, 9, C_FILL);                     // Fill a rectangle indicating RX mode
-        PrintMediumBoldEx(25, /*BASE-15*/27, POS_L, C_INVERT, "RX");    // Display "RX" indicator
+        // Render the RSSI bar for the active VFO
+        //UI_RSSIBar(gLoot[activeVFO].rssi, RADIO_GetSNR(), rx_f, /*BASE+3*/45);
+      
+        // Check if the device is listening
+        if (gIsListening)
+          {
+            FillRect(35, 8, 17, 9, C_FILL);                      // Fill a rectangle indicating RX mode
+            PrintMediumBoldEx(36, 15, POS_L, C_INVERT, "RX");    // Display "RX" indicator            
+          }           
       }
+  
+    
+    FillRect(0, 8, 25, 9, C_FILL);
+    PrintMediumBoldEx(1, 15, POS_L, C_INVERT, "VA3");
+    
+    
+      
+    if (gSettings.scrambler=true)
+      {
+        FillRect(53, 8, 9, 9, C_FILL);                      // Fill a rectangle indicating scrambler mode
+        PrintMediumBoldEx(54, 15, POS_L, C_INVERT, "$");    // Display "$" indicator      
+      }
+      
+      
+
+    if (gSettings.compander=true)
+      {
+        FillRect(63, 8, 9, 9, C_FILL);                      // Fill a rectangle indicating compander mode
+        PrintMediumBoldEx(64, 15, POS_L, C_INVERT, "C");    // Display "C" indicator     
+      }
+
+
+
+    //if (vfo->rx.codeType)
+
+    if (vfo->rx.codeType)
+      {
+        PrintSmallEx(92, 20, POS_R, C_FILL, "%c%c", TX_CODE_TYPES[vfo->rx.codeType][0], TX_CODE_TYPES[vfo->rx.codeType][1]);
+      }
+
+    if (vfo->tx.codeType)
+      {      
+        PrintSmallEx(105, 20, POS_R, C_FILL, "%c%c", TX_CODE_TYPES[vfo->tx.codeType][0], TX_CODE_TYPES[vfo->tx.codeType][1]);
+
+      }
+      
+    if (loot->ct != 0xff)
+      {
+        PrintSmallEx(76, 13, POS_L, C_FILL, "%u.%u", CTCSS_Options[loot->ct] / 10, CTCSS_Options[loot->ct] % 10);      
+      }
+      
+    if (loot->cd != 0xff && loot->ct == 0xff)
+      {
+        PrintSmallEx( 76, 13, POS_L, C_FILL, "D%03oN", DCS_Options[loot->cd]);
+      }
+
+   
       
     // Check if in pro mode for additional functionality
     if (gVfo1ProMode) 
@@ -639,17 +728,17 @@ void VFO1_render(void)
       {
         // Fill a rectangle for VFO/channel A & B
         FillRect(0 + 44 * activeVFO, /*LCD_HEIGHT-9*/55, 43, 9, C_FILL);    
-        for (int i = 0; i < 2; i++)
+        for (uint8_t i = 0; i < 2; i++)
           {
             // Display channel number if it exists
             if (gVFO[i].channel >= 0) 
               {
-                PrintMediumEx(1 + i * 45, /*LCD_HEIGHT-2*/62, POS_L, C_INVERT, "CH-%u", gVFO[i].channel + 1); 
+                PrintMediumEx(1 + i * 45, 62, POS_L, C_INVERT, "CH-%04u", gVFO[i].channel + 1); 
               }
             else
               {
                 // Otherwise display the VFO identifier
-                PrintMediumBoldEx(1 + i * 45, /*LCD_HEIGHT-2*/62, POS_L, C_INVERT, "VFO-%c", 'A' + i); 
+                PrintMediumEx(7 + i * 45, 62, POS_L, C_INVERT, "VFO-%c", 'A' + i); 
               }
         }
     }
