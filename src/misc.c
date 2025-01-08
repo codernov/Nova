@@ -1,3 +1,15 @@
+#include <stdint.h>
 #include "misc.h"
 
-char IsPrintable(char ch) { return (ch < 32 || 126 < ch) ? ' ' : ch; }
+
+
+// Is char printable, is it in fonts
+//---------------------------------------------------------------------------
+char IsPrintable(char ch) 
+  { 
+    return (ch < 32 || 126 < ch) ? ' ' : ch; 
+  }
+  
+//---------------------------------------------------------------------------
+
+
