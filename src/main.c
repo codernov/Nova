@@ -51,13 +51,13 @@ static void unreborn(void) {
   for (uint16_t i = 0; i < EEPROM_SIZE; i += PAGE_SIZE) {
     EEPROM_WriteBuffer(i, tpl, PAGE_SIZE);
     UI_ClearScreen();
-    PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xff\'ing... %u",
+    PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xFF\'ing... %u",
                   i * 100 / EEPROM_SIZE);
     ST7565_Blit();    
   }
 
   UI_ClearScreen();
-  PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xff\'ed !!!");
+  PrintMediumEx(LCD_XCENTER, LCD_YCENTER, POS_C, C_FILL, "0xFF\''ed !!!");
   ST7565_Blit();
 
   AUDIO_PlayTone(1200, 68);
@@ -106,7 +106,7 @@ void Main(void) {
   SYSTEM_ConfigureSysCon();
   SYSTICK_Init();
 
-  gSettings.contrast = 6;
+  gSettings.contrast = 2 + 8;
   BOARD_Init();
 
   BACKLIGHT_SetBrightness(7);

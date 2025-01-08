@@ -54,34 +54,43 @@ unsigned int SQRT16(unsigned int value) {
 }
 
 
+
+
 //---------------------------------------------------------------------------
 void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y) 
   {
-    //  if (rssi == 0) {
-    //    return;
-    //  }
-
     const uint8_t BAR_LEFT_MARGIN = 0;
     uint8_t BAR_WIDTH = LCD_WIDTH - BAR_LEFT_MARGIN - 22;
     const uint8_t BAR_BASE = y + 7;
 
     FillRect(0, y, LCD_WIDTH, 8, C_CLEAR);
 
-    const uint16_t RSSI_MIN = 10;
-    const uint16_t RSSI_MAX = 350;
+    const uint16_t RSSI_MIN = 28;//10;
+    const uint16_t RSSI_MAX = 226;//350;
     const uint16_t SNR_MIN = 0;
     const uint16_t SNR_MAX = 30;
+    
   
     uint8_t rssiW = ConvertDomain(rssi, RSSI_MIN, RSSI_MAX, 0, BAR_WIDTH);
-    uint8_t snrW = ConvertDomain(RADIO_GetSNR(), SNR_MIN, SNR_MAX, 0, BAR_WIDTH);
+    uint8_t snrW = ConvertDomain(snr, SNR_MIN, SNR_MAX, 0, BAR_WIDTH);
 
-    if (!gIsListening)
+    FillRect(BAR_LEFT_MARGIN, y + 2 + 2, rssiW, 4, C_FILL);
+    FillRect(BAR_LEFT_MARGIN, y + 7 - 5, snrW, 1, C_FILL);
+
+    DrawHLine(0, y + 5 - 1, BAR_WIDTH - 2, C_FILL);
+    for (int16_t r = Rssi2DBm(RSSI_MIN); r < Rssi2DBm(RSSI_MAX); r++) 
       {
-        rssiW = 0;
-        snrW = 0;
-        BAR_WIDTH += 22;
+        if (r % 10 == 0) 
+          {
+            FillRect( ConvertDomain(r, Rssi2DBm(RSSI_MIN), Rssi2DBm(RSSI_MAX), 0, BAR_WIDTH),
+                      y + 5 + 2 - (r % 50 == 0 ? 2 : 2), 
+                      1, 
+                      r % 50 == 0 ? 2 : 1, 
+                      C_INVERT);
+          }
       }
 
+/*
     FillRect(BAR_LEFT_MARGIN, y + 2, rssiW, 4, C_FILL);
     FillRect(BAR_LEFT_MARGIN, y + 7, snrW, 1, C_FILL);
 
@@ -95,36 +104,26 @@ void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y)
                                     y + 5 - (r % 50 == 0 ? 2 : 1), 1, r % 50 == 0 ? 2 : 1, C_INVERT);
           }
       }
-  
-    if (!gIsListening)
-      return;
-      
-//    PrintMediumEx(LCD_WIDTH - 1, BAR_BASE, 2, true, "%d", Rssi2DBm(rssi));
-
-    uint8_t dBm = Rssi2DBm(rssi)*-1;
-    uint8_t dBmMax6 = (f>=3000000) ? 93 : 73;
-    uint8_t dBmMax10 = (f>=3000000) ? 33 : 13;
+*/
 
   
-//    if ((gIsListening || dBmMax6==73) && dBm>0 && dBm<(dBmMax6+49) && y==44) 
-      { // active or <30mhz & 1VFO mode - (in 1VFO y=BASE+2)
-/*        if(dBm>(dBmMax6-10))
-          { 
-            uint8_t s=((dBm-dBmMax6)/6)+(1*((dBm-dBmMax6)%6)>0); 
-            if (dBm<dBmMax6) 
-              s=0;
-              
-            PrintMediumEx(LCD_WIDTH - 1, LCD_HEIGHT - 4, POS_R, C_FILL, "S%u", 9-s);
-          } 
-        else 
-*/          {
-            uint8_t s=((dBm-dBmMax10)/10)+(1*((dBm-dBmMax10)%10)>0); 
-            if (dBm<dBmMax10) 
-              s=0;
-     
-            PrintMediumEx(LCD_WIDTH - 1, LCD_HEIGHT - 4, POS_R, C_FILL, "S9+%u0", 6-s);
-          }
-      } 
+    int dBm = Rssi2DBm(rssi); 
+    bool vhf = f >= 3000000;
+    uint8_t dBmMax6 = vhf ? 93 : 73;
+    uint8_t S = DBm2S(dBm, vhf);
+    
+  
+    PrintMediumEx(LCD_WIDTH - 1, BAR_BASE, 2, true, "%i", dBm);
+
+
+    if (-dBm > (dBmMax6-10))
+      {
+        PrintMediumEx(LCD_WIDTH - 2, LCD_HEIGHT - 4, POS_R, C_FILL, "S%u", S);
+      }
+    else
+      {
+        PrintMediumEx(LCD_WIDTH - 2, LCD_HEIGHT - 4, POS_R, C_FILL, "S9+%u0", S - 8);
+      }
   }
 
 //---------------------------------------------------------------------------

@@ -662,7 +662,8 @@ void VFO1_render(void)
     if (gTxState == TX_UNKNOWN)
       {
         // Render the RSSI bar for the active VFO
-        //UI_RSSIBar(gLoot[activeVFO].rssi, RADIO_GetSNR(), rx_f, /*BASE+3*/45);
+        UI_RSSIBar(/*gLoot[activeVFO].rssi*/BK4819_GetRSSI(), /*RADIO_GetSNR()*/RADIO_GetSNR(), rx_f, /*BASE+3*/45);
+        
       
         // Check if the device is listening
         if (gIsListening)

@@ -210,10 +210,10 @@ void AcceptRadioConfig(const MenuItem *item, uint8_t subMenuIndex) {
     break;
 
   case M_GAIN:
-    gCurrentPreset->band.gainIndex = subMenuIndex;
-    BK4819_SetAGC(RADIO_GetModulation() != MOD_AM,
-                  gCurrentPreset->band.gainIndex);
-    PRESETS_SaveCurrent();
+//    gCurrentPreset->band.gainIndex = subMenuIndex;
+//    BK4819_SetAGC(RADIO_GetModulation() != MOD_AM,
+//                  gCurrentPreset->band.gainIndex);
+//    PRESETS_SaveCurrent();
     break;
   case M_TX:
     gCurrentPreset->allowTx = subMenuIndex;
