@@ -37,7 +37,7 @@ void UI_TxBar(uint8_t y)
 
 
 
-
+/*
 unsigned int SQRT16(unsigned int value) {
   unsigned int shift = 16; // number of bits supplied in 'value' .. 2 ~ 32
   unsigned int bit = 1u << --shift;
@@ -52,7 +52,7 @@ unsigned int SQRT16(unsigned int value) {
   }
   return sqrti;
 }
-
+*/
 
 
 
@@ -90,7 +90,7 @@ void UI_RSSIBar(uint16_t rssi, uint8_t snr, uint32_t f, uint8_t y)
           }
       }
 
-/*
+/* -------ORIGINAL fagci bar, above bar is turned upside down
     FillRect(BAR_LEFT_MARGIN, y + 2, rssiW, 4, C_FILL);
     FillRect(BAR_LEFT_MARGIN, y + 7, snrW, 1, C_FILL);
 

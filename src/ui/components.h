@@ -8,14 +8,14 @@
 #define BATTERY_W 13
 
 
-#define MIN(a, b)                                                              \
-  ({                                                                           \
-    __typeof__(a) _a = (a);                                                    \
-    __typeof__(b) _b = (b);                                                    \
-    _a < _b ? _a : _b;                                                         \
-  })
+//#define MIN(a, b)                                                              \
+//  ({                                                                           \
+//    __typeof__(a) _a = (a);                                                    \
+//    __typeof__(b) _b = (b);                                                    \
+//    _a < _b ? _a : _b;                                                         \
+//  })
 
-unsigned int SQRT16(unsigned int value);
+//unsigned int SQRT16(unsigned int value);
 
 
 void UI_Battery(uint8_t Level);
